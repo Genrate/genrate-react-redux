@@ -1,12 +1,14 @@
 import { OverrideStore } from '@genrate/react/lib/src/override/override';
-import ReduxModel, { getByExceptKeys, getSelectors, get_overidde_keys, is_override_exists, useHooks } from './redux';
-import { useEffect } from 'react';
+import Model, { getByExceptKeys, getSelectors, get_selector_keys, is_selectors_exists } from './model';
+import { useEffect, useReducer } from 'react';
+import { store } from '@genrate/react/lib/src/store';
+import { KeyValue } from '@genrate/react/lib/src/override';
 
 export const Store: OverrideStore = {
   useInit(connectorId, data) {
-    const set = ReduxModel.useSet();
-    const unset = ReduxModel.useUnset();
-    const setValue = ReduxModel.useSetValue();
+    const set = Model.useSet();
+    const unset = Model.useUnset();
+    const setValue = Model.useSetValue();
 
     useEffect(() => {
       set([connectorId, data]);
@@ -18,48 +20,32 @@ export const Store: OverrideStore = {
 
     return [data, (key, value) => setValue([connectorId, key, value])];
   },
-  useData(connectorId, propKeys, subKeys, exceptKeys) {
+  useState(connectorId, subKeys, exceptKeys) {
     let selectKeys: string[] = [];
     const stateKeys: string[] = [];
-    const hookKeys: string[] = [];
 
     if (subKeys) {
       for (const vk of subKeys) {
-        if (is_override_exists(connectorId, vk, 'hooks')) {
-          hookKeys.push(vk);
-        } else if (is_override_exists(connectorId, vk)) {
-          selectKeys.push(vk);
-        } else {
-          stateKeys.push(vk);
-        }
+        is_selectors_exists(connectorId, vk) 
+          ? selectKeys.push(vk)
+          : stateKeys.push(vk);
       }
     }
 
     if (subKeys === undefined) {
-      selectKeys = get_overidde_keys(connectorId);
+      selectKeys = get_selector_keys(connectorId);
     }
 
     const state = getByExceptKeys.useSelect(connectorId, stateKeys, exceptKeys);
-    const redux = getSelectors.useSelect(connectorId, selectKeys);
+    const selectors = getSelectors.useSelect(connectorId, selectKeys);
 
-    const hooks = useHooks(connectorId, hookKeys);
-
-    const data = { ...state, ...redux, ...hooks };
-
-    const props: Record<string, any> = { ...(exceptKeys !== undefined ? state : {}) };
-    if (propKeys) {
-      for (const prop of propKeys) {
-        props[prop] = data[prop];
-      }
-    }
-
-    return [props, data];
+    return { ...state, ...selectors };
   },
-  useModel(connectorId: string, key?: string | undefined): [value: unknown, (value: unknown) => void] {
-    if (!key) return [null, () => {}];
+  useModel(connectorId: string, key?: string | undefined): [value: unknown, set: (value: unknown) => void] {
+    if (!key) return [null, () => { } ];
 
-    const data = ReduxModel.useGetByKey(connectorId, key);
-    const setValue = ReduxModel.useSetValue();
+    const data = Model.useGetByKey(connectorId, key);
+    const setValue = Model.useSetValue();
 
     return [
       data ?? '',
@@ -68,4 +54,40 @@ export const Store: OverrideStore = {
       },
     ];
   },
+  useHooks: (connectorId: string, keys?: string[] | undefined, except?: string[] | undefined) => {
+    const hookId = `${connectorId}--hooks`;
+    const [, forceUpdate] = useReducer((x) => x + 1, 0);
+
+    useEffect(() => {
+      if (!keys?.length) return;
+
+      const subs = keys?.map((key) => store.subscribe(hookId, key, () => forceUpdate()));
+
+      return () => {
+        subs?.map((sub) => sub.unsubscribed());
+      };
+    }, [keys]);
+
+    const values: KeyValue = {};
+
+    if (keys) {
+      for (const key of keys) {
+        values[key] = store.get(hookId, key);
+      }
+    }
+
+    return values;
+  },
+  useHooksInit: (connectorId: string) => {
+    const hookId = `${connectorId}--hooks`;
+    const state = Model[connectorId].useAll();
+    const selectors = getSelectors.useSelect(connectorId, true);
+
+    return [
+      { ...state, ...selectors },
+      (key, value) => {
+        store.set(hookId, key, value);
+      }
+    ]
+  }
 };
