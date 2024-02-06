@@ -81,7 +81,7 @@ const Loading = ({ title = 'loading...' }) => <p>{title}</p>;
 
 const TestComponent = () => {
   const { view, set } = useData({
-    local: {
+    state: {
       phrase: 'yeah',
     },
     selectors: {
@@ -103,7 +103,7 @@ const TestComponent = () => {
 
 const TestInput = () => {
   const { view, model, pass, each } = useData({
-    local: {
+    state: {
       test: '',
     },
     selectors: {
@@ -139,18 +139,20 @@ const TestHooks = () => {
   return view(Template, {
     button:
       ({ setPhrase }) =>
-      () => ({
-        onClick: () => {
-          setWord('hi');
-          setPhrase('world');
-        },
-      }),
+      () => {
+        return {
+          onClick: () => {
+            setWord('hi');
+            setPhrase('world');
+          },
+        };
+      },
   });
 };
 
 const TestAPI = () => {
   const { view, each, model, attach } = useData({
-    local: {
+    state: {
       input: [] as string[],
     },
     hooks: {
@@ -172,14 +174,16 @@ const TestAPI = () => {
       () => ({ test: posts?.status }),
     button:
       ({ updatePost, updateStatus, input }) =>
-      () => ({
-        onClick: () => {
-          const id = 2;
-          updatePost({ id: `${id}`, content: input[id - 1] });
-        },
-        disabled: updateStatus?.isLoading,
-        status: updateStatus?.status,
-      }),
+      () => {
+        return {
+          onClick: () => {
+            const id = 2;
+            updatePost({ id: `${id}`, content: input[id - 1] });
+          },
+          disabled: updateStatus?.isLoading,
+          status: updateStatus?.status,
+        };
+      },
   });
 };
 
@@ -234,7 +238,7 @@ describe('index', () => {
       expect(container.querySelector('span')).toHaveTextContent('hi world');
     });
 
-    it('should render and apply hooks', async () => {
+    it('should render and apply api hooks', async () => {
       const { container } = render(
         <Provider store={store}>
           <TestAPI />

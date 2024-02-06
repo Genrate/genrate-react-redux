@@ -541,10 +541,10 @@
   resolved "https://registry.npmjs.org/@fastify/busboy/-/busboy-2.1.0.tgz"
   integrity sha512-+KpH+QxZU7O4675t3mnkQKcZZg56u+K/Ct2K+N2AZYNVK8kyeo/bI18tI8aPm3tvNNRyTWfj6s5tnGNlcbQRsA==
 
-"@genrate/react@^1.0.17":
-  version "1.0.17"
-  resolved "https://registry.npmjs.org/@genrate/react/-/react-1.0.17.tgz"
-  integrity sha512-pofRcVOnXjIoJAjWlWttUfpVfXwpY2WFHDzL76Ht3lS7ZK/EDwAITZHhSMwHx7J8ldftdCL5xLmiz2tKUVMMzg==
+"@genrate/react@^1.0.18":
+  version "1.0.18"
+  resolved "https://registry.npmjs.org/@genrate/react/-/react-1.0.18.tgz"
+  integrity sha512-us7C89EXZ+TIh2TUIO3zodsw6kMu6lb4uAzGAbluLIJ/i8ap1D8Arw01rfR48t2RQ7JQ7ZtspqCo7/3iH140uw==
   dependencies:
     md5 "^2.3.0"
 
