@@ -20,6 +20,10 @@ export function get_selector_keys(connId: string) {
   return Object.keys($Override.selectors[connId] ?? {});
 }
 
+function toResult(obj: KeyValue) {
+  return Object.keys(obj ?? {}).length ? obj : undefined;
+}
+
 const ConnectorModel = model(
   '$$connector',
   {} as KeyValue<KeyValue<any>>,
@@ -50,6 +54,9 @@ const ConnectorModel = model(
     },
   },
   {
+    getAll: (state, connectorId: string) => {
+      return Object.keys(state[connectorId] ?? {}).length ? state[connectorId] : undefined;
+    },
     getByKey: (state, connectorId: string, key: string) => {
       const connData = state[connectorId] ?? {};
 
@@ -88,7 +95,7 @@ export const getSelectors = select(
       }
     }
 
-    return data;
+    return toResult(data);
   }
 );
 
@@ -97,7 +104,7 @@ export const getByExceptKeys = select(
   [arg<string>(1), arg<string[] | undefined>(2), arg<string[] | undefined>(3)],
   (state, connId, keys, except) => {
     if (keys === undefined) {
-      return state[connId] ?? {};
+      return state[connId] ?? undefined;
     }
 
     const allKeys = except !== undefined ? Object.keys(state[connId] ?? {}).filter((k) => except.indexOf(k) < 0) : [];
@@ -113,7 +120,7 @@ export const getByExceptKeys = select(
 
     if (allKeys.length) allKeys.map((k) => (data[k] = state[connId]?.[k]));
 
-    return data;
+    return toResult(data);
   }
 );
 

@@ -126,9 +126,6 @@ const TestInput = () => {
 
 const TestHooks = () => {
   const { view } = useData({
-    state: { 
-
-    },
     selectors: {
       word: () => testModel.word,
     },
@@ -142,12 +139,14 @@ const TestHooks = () => {
   return view(Template, {
     button:
       ({ setPhrase }) =>
-      () => ({
-        onClick: () => {
-          setWord('hi');
-          setPhrase('world');
-        },
-      }),
+      () => {
+        return {
+          onClick: () => {
+            setWord('hi');
+            setPhrase('world');
+          },
+        };
+      },
   });
 };
 
@@ -175,14 +174,16 @@ const TestAPI = () => {
       () => ({ test: posts?.status }),
     button:
       ({ updatePost, updateStatus, input }) =>
-      () => ({
-        onClick: () => {
-          const id = 2;
-          updatePost({ id: `${id}`, content: input[id - 1] });
-        },
-        disabled: updateStatus?.isLoading,
-        status: updateStatus?.status,
-      }),
+      () => {
+        return {
+          onClick: () => {
+            const id = 2;
+            updatePost({ id: `${id}`, content: input[id - 1] });
+          },
+          disabled: updateStatus?.isLoading,
+          status: updateStatus?.status,
+        };
+      },
   });
 };
 
@@ -205,71 +206,71 @@ describe('index', () => {
       expect(container.querySelector('span')).toHaveTextContent('hello world');
     });
 
-    // it('should render and apply model', () => {
-    //   const { container } = render(
-    //     <Provider store={store}>
-    //       <TestInput />
-    //     </Provider>
-    //   );
+    it('should render and apply model', () => {
+      const { container } = render(
+        <Provider store={store}>
+          <TestInput />
+        </Provider>
+      );
 
-    //   expect(container.querySelector('input[value]')).toBeTruthy();
-    //   expect(container.querySelectorAll('li').length).toBe(3);
+      expect(container.querySelector('input[value]')).toBeTruthy();
+      expect(container.querySelectorAll('li').length).toBe(3);
 
-    //   const input = container.querySelector('input');
-    //   if (input) fireEvent.change(input, { target: { value: 'write' } });
+      const input = container.querySelector('input');
+      if (input) fireEvent.change(input, { target: { value: 'write' } });
 
-    //   expect(container.querySelector('span')).toHaveTextContent('write');
-    //   expect(container.querySelectorAll('li').length).toBe(1);
-    // });
+      expect(container.querySelector('span')).toHaveTextContent('write');
+      expect(container.querySelectorAll('li').length).toBe(1);
+    });
 
-    // it('should render and apply hooks', () => {
-    //   const { container } = render(
-    //     <Provider store={store}>
-    //       <TestHooks />
-    //     </Provider>
-    //   );
+    it('should render and apply hooks', () => {
+      const { container } = render(
+        <Provider store={store}>
+          <TestHooks />
+        </Provider>
+      );
 
-    //   expect(container.querySelector('span')).toHaveTextContent('sample');
+      expect(container.querySelector('span')).toHaveTextContent('sample');
 
-    //   const button = container.querySelector('button');
-    //   if (button) fireEvent.click(button);
+      const button = container.querySelector('button');
+      if (button) fireEvent.click(button);
 
-    //   expect(container.querySelector('span')).toHaveTextContent('hi world');
-    // });
+      expect(container.querySelector('span')).toHaveTextContent('hi world');
+    });
 
-    // it('should render and apply hooks', async () => {
-    //   const { container } = render(
-    //     <Provider store={store}>
-    //       <TestAPI />
-    //     </Provider>
-    //   );
+    it('should render and apply api hooks', async () => {
+      const { container } = render(
+        <Provider store={store}>
+          <TestAPI />
+        </Provider>
+      );
 
-    //   expect(container.querySelector('span')).toHaveTextContent('pending');
-    //   expect(container.querySelector('p')).toHaveTextContent('Loading posts...');
+      expect(container.querySelector('span')).toHaveTextContent('pending');
+      expect(container.querySelector('p')).toHaveTextContent('Loading posts...');
 
-    //   await waitFor(() => {
-    //     expect(container.querySelector('input')).toBeTruthy();
-    //     expect(container.querySelector('span')).toHaveTextContent('fulfilled');
-    //     expect(container.querySelectorAll('input').length).toBe(2);
-    //   });
+      await waitFor(() => {
+        expect(container.querySelector('input')).toBeTruthy();
+        expect(container.querySelector('span')).toHaveTextContent('fulfilled');
+        expect(container.querySelectorAll('input').length).toBe(2);
+      });
 
-    //   const input = container.querySelector('input[name="input.2"]');
-    //   if (input) fireEvent.change(input, { target: { value: 'test 2' } });
+      const input = container.querySelector('input[name="input.2"]');
+      if (input) fireEvent.change(input, { target: { value: 'test 2' } });
 
-    //   await waitFor(() => {
-    //     expect(container.querySelector('input[name="input.2"]')).toHaveAttribute('value', 'test 2');
-    //   });
+      await waitFor(() => {
+        expect(container.querySelector('input[name="input.2"]')).toHaveAttribute('value', 'test 2');
+      });
 
-    //   const button = container.querySelector('button');
-    //   if (button) fireEvent.click(button);
+      const button = container.querySelector('button');
+      if (button) fireEvent.click(button);
 
-    //   expect(container.querySelector('button')).toHaveAttribute('status', 'pending');
-    //   expect(container.querySelector('button[disabled]')).toBeTruthy();
+      expect(container.querySelector('button')).toHaveAttribute('status', 'pending');
+      expect(container.querySelector('button[disabled]')).toBeTruthy();
 
-    //   await waitFor(() => {
-    //     expect(container.querySelector('button[disabled]')).toBeFalsy();
-    //     expect(container.querySelector('button')).toHaveAttribute('status', 'fulfilled');
-    //   });
-    // });
+      await waitFor(() => {
+        expect(container.querySelector('button[disabled]')).toBeFalsy();
+        expect(container.querySelector('button')).toHaveAttribute('status', 'fulfilled');
+      });
+    });
   });
 });

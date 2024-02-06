@@ -1,7 +1,7 @@
 import { Selector } from '@reduxjs/toolkit';
 import { useConnector } from '@genrate/react';
 import { KeyValue } from '@genrate/react/lib/src/override';
-import { HookFn, Override } from '@genrate/react/lib/src/override/override';
+import { HookFnMap, Override } from '@genrate/react/lib/src/override/override';
 import { ModelType } from '@genrate/redux';
 
 import { Store } from './store';
@@ -30,7 +30,7 @@ export function useData<
   State extends KeyValue,
   Selectors extends KeyValue = KeyValue<SelectorFn<State>>,
   HookState extends KeyValue = State & SelectorValues<Selectors>,
-  Hooks extends KeyValue = KeyValue<HookFn<HookState>>,
+  Hooks extends KeyValue = HookFnMap<HookState>,
 >(data?: Data<State, Selectors, Hooks>) {
   const connector = useConnector<State, HookState, Hooks>(data);
 
